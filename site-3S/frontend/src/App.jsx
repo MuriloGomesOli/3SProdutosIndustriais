@@ -7,19 +7,22 @@ import Sobre from "./pages/Sobre";
 import Contato from "./pages/Contato";
 import AdminProdutos from "./pages/AdminProdutos";
 import "./App.css";
+import AdminLogin from "./pages/AdminLogin";
+
 
 export default function App() {
   return (
     <BrowserRouter>
      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/produtos" element={<Produtos />} />
-          <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
-          <Route path="/sobre" element={<Sobre />} />
-          <Route path="/contato" element={<Contato />} />
-          <Route path="/admin" element={<AdminProdutos />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/produtos" element={<Produtos />} />
+        <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
+        <Route path="/sobre" element={<Sobre />} />
+        <Route path="/contato" element={<Contato />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminProdutos />} />
+      </Routes>
       </main>
 
       <footer>

@@ -98,7 +98,7 @@ export default function Home() {
 
   {/* Botão Admin fixo embaixo */}
   <div className="admin-btn">
-    <Link to="/admin">Admin</Link>
+    <Link to="/admin/login">Admin</Link>
   </div>
 </div>
     </div>);
