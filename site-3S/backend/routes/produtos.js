@@ -1,13 +1,16 @@
 import express from "express";
-import { openDb } from "../db.js";
+import { db } from "../db.js";
 
 const router = express.Router();
 
-// Listar todos os produtos
+// Listar todos os produtos com nome da categoria
 router.get("/", async (req, res) => {
   try {
-    const db = await openDb();
-    const [produtos] = await db.query("SELECT * FROM produtos");
+    const [produtos] = await db.query(`
+      SELECT p.*, c.nome as categoria_nome 
+      FROM produtos p 
+      LEFT JOIN categorias c ON p.categoria_id = c.id
+    `);
     res.json(produtos);
   } catch (error) {
     console.error(error);
@@ -18,7 +21,6 @@ router.get("/", async (req, res) => {
 // Buscar produto por ID
 router.get("/:id", async (req, res) => {
   try {
-    const db = await openDb();
     const [rows] = await db.query("SELECT * FROM produtos WHERE id = ?", [
       req.params.id,
     ]);

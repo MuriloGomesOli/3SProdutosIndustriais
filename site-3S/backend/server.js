@@ -20,6 +20,13 @@ async function conectarBanco() {
 conectarBanco();
 
 // Rotas
+import produtosRoutes from "./routes/produtos.js";
+import clientesRoutes from "./routes/clientes.js";
+import pedidosRoutes from "./routes/pedidos.js";
+
+app.use("/api/produtos", produtosRoutes);
+app.use("/api/clientes", clientesRoutes);
+app.use("/api/pedidos", pedidosRoutes);
 app.use("/admin", adminRoutes);
 
 const PORT = 3000;

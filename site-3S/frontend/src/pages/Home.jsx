@@ -1,119 +1,130 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import "../App.css"; // Ensure CSS is imported
 
 export default function Home() {
+  const [showRightMenu, setShowRightMenu] = useState(false);
+  const [destaques, setDestaques] = useState([]);
+  const [ofertas, setOfertas] = useState([]);
+
+  // Categories list with sub-items as requested
   const categorias = [
-    { id: 1, nome: "Fixação", img: "https://images.unsplash.com/photo-1581092333153-0d0f0fbd9d47?auto=format&fit=crop&w=800&q=80" },
-    { id: 2, nome: "Conexões", img: "https://images.unsplash.com/photo-1602524818230-3cfd5c9b3b8d?auto=format&fit=crop&w=800&q=80" },
-    { id: 3, nome: "Siderúrgicos", img: "https://images.unsplash.com/photo-1581091215361-d0d6e6d3bfa8?auto=format&fit=crop&w=800&q=80" },
-    { id: 4, nome: "Metais", img: "https://images.unsplash.com/photo-1581091215363-efb1e01df7f1?auto=format&fit=crop&w=800&q=80" },
-    { id: 5, nome: "Vedação", img: "https://images.unsplash.com/photo-1602524818254-0d0f0fbd9d47?auto=format&fit=crop&w=800&q=80" },
-    { id: 6, nome: "Plástico", img: "https://images.unsplash.com/photo-1592289867202-7b183d057eb2?auto=format&fit=crop&w=800&q=80" },
+    { id: 7, nome: "Válvulas", sub: ["Esfera", "Gaveta", "Globo", "Retenção", "Borboleta"] },
+    { id: 1, nome: "Fixação", sub: ["Parafuso", "Arruelas", "Barra Roscada", "Buchas", "Chumbador", "Escapula", "Gancho", "Pregos"] },
+    { id: 2, nome: "Conexões", sub: ["Flange", "Curvas", "Teg", "Cotovelos", "Cruzetas", "Conectores", "Luvas"] },
+    { id: 3, nome: "Siderúrgicos", sub: ["Materiais Siderúrgicos"] },
+    { id: 4, nome: "Metais Não Ferrosos", sub: ["Latão", "Cobre", "Alumínio", "Bronze", "Inox"] },
+    { id: 5, nome: "Vedação Industrial", sub: ["Juntas", "Expansão", "Papelão Hidr.", "Isolação", "Fitas", "Graxetas"] },
+    { id: 6, nome: "Plástico", sub: ["Placas", "Tarugos", "Tubos", "Películas", "Barras", "Usinados"] },
   ];
 
-  const [showRightMenu, setShowRightMenu] = useState(false);
+  useEffect(() => {
+    // Fetch products for "Destaques" and "Ofertas"
+    fetch("http://localhost:3000/api/produtos")
+      .then(res => res.json())
+      .then(data => {
+        setDestaques(data.slice(0, 4)); // Show first 4 as highlights
+        setOfertas(data); // All products for carousel
+      })
+      .catch(err => console.error("Erro ao buscar produtos:", err));
+  }, []);
 
   return (
-    <div style={{ fontFamily: "Roboto, sans-serif", position: "relative" }}>
-      {/* Top bar */}
-      <header className="top-bar">
-  <div className="logo">3S Produtos Industriais</div>
+    <div className="home-container">
+      {/* Top Bar / Header */}
+      <header className="main-header">
+        <div className="header-content">
+          <div className="logo">3S Produtos Industriais</div>
+          <div className="search-bar">
+            <input type="text" placeholder="Buscar produtos, marcas e muito mais..." />
+            <button><i className="fas fa-search"></i></button>
+          </div>
+          <div className="header-actions">
+            <Link to="/login" className="header-link">Contato</Link>
+            <Link to="/sobre" className="header-link">Quem Somos</Link>
+            <Link to="/login" className="cart-icon">
+              <i className="fas fa-shopping-cart"></i>
+            </Link>
+          </div>
+        </div>
+      </header>
 
-  <div className="actions">
-    {/* Input de pesquisa */}
-    <input
-      type="text"
-      placeholder="Pesquisar produto..."
-      className="search-input"
-    />
+      {/* Main Layout: Sidebar + Banner */}
+      <div className="main-layout">
+        <aside className="categories-sidebar">
+          <h3>Categorias</h3>
+          <ul>
+            {categorias.map(cat => (
+              <li key={cat.id} className="cat-item">
+                <Link to={`/produtos?cat=${cat.id}`} className="cat-link">
+                  {cat.nome}
+                  <i className="fas fa-chevron-right"></i>
+                </Link>
+                {/* Hover Menu for Sub-items */}
+                <div className="sub-menu">
+                  <h4>{cat.nome}</h4>
+                  <ul>
+                    {cat.sub.map((sub, idx) => (
+                      <li key={idx}>{sub}</li>
+                    ))}
+                  </ul>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </aside>
 
-    {/* Ícones usando Font Awesome */}
-    <button className="icon-btn">
-      <i className="fas fa-heart"></i>
-    </button>
-    <button className="icon-btn">
-      <i className="fas fa-shopping-cart"></i>
-    </button>
-  </div>
-</header>
+        <main className="content-area">
+          {/* Hero Banner */}
+          <section className="hero-banner">
+            <div className="banner-text">
+              <h1>Soluções Industriais de Alta Performance</h1>
+              <p>Qualidade e confiança para sua empresa.</p>
+              <Link to="/produtos" className="cta-button">Ver Ofertas</Link>
+            </div>
+          </section>
 
+          {/* Ofertas Carousel - Auto-scrolling */}
+          <section className="ofertas-section">
+            <h2>🔥 Ofertas Especiais</h2>
+            <div className="carousel-container">
+              <div className="carousel-track">
+                {/* Duplicate products for infinite scroll effect */}
+                {ofertas.concat(ofertas).map((prod, idx) => (
+                  <div key={`${prod.id}-${idx}`} className="carousel-card">
+                    <img src={prod.imagem || "https://via.placeholder.com/150"} alt={prod.nome} />
+                    <div className="prod-info">
+                      <h3>{prod.nome}</h3>
+                      <p className="price">R$ {prod.preco}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
 
-      {/* Hero */}
-      <section style={{
-        background: "linear-gradient(135deg, #2c2c2c 0%, #555555 100%)",
-        color: "#fff", textAlign: "center", padding: "6rem 2rem", margin: "2rem",
-        borderRadius: "12px", boxShadow: "0 10px 20px rgba(0,0,0,0.3)"
-      }}>
-        <h1 style={{ fontSize: "3rem", fontWeight: "800" }}>Bem-vindo à 3S Produtos Industriais</h1>
-        <p style={{ fontSize: "1.2rem", color: "#ddd" }}>Soluções de qualidade para a sua indústria</p>
-        <button style={{
-          backgroundColor: "#ff6600", color: "#fff", border: "none", padding: "0.75rem 2rem",
-          fontSize: "1.1rem", cursor: "pointer", borderRadius: "6px", fontWeight: "bold", boxShadow: "0 5px 15px rgba(255,102,0,0.3)"
-        }}>Saiba Mais</button>
-      </section>
+          {/* Destaques */}
+          <section className="highlights">
+            <h2>Destaques</h2>
+            <div className="products-grid">
+              {destaques.length > 0 ? destaques.map(prod => (
+                <div key={prod.id} className="product-card-mini">
+                  <img src={prod.imagem || "https://via.placeholder.com/150"} alt={prod.nome} />
+                  <div className="prod-info">
+                    <h3>{prod.nome}</h3>
+                    <p className="price">R$ {prod.preco}</p>
+                  </div>
+                </div>
+              )) : <p>Carregando destaques...</p>}
+            </div>
+          </section>
+        </main>
+      </div>
 
-      {/* Categorias */}
-      <section style={{
-        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: "1.5rem", padding: "0 2rem", marginBottom: "6rem"
-      }}>
-        {categorias.map(cat => (
-          <Link key={cat.id} to={`/produtos/${cat.id}`} style={{
-            position: "relative", height: "200px", borderRadius: "14px", overflow: "hidden",
-            display: "flex", alignItems: "flex-end", color: "#fff", textDecoration: "none",
-            fontSize: "1.3rem", fontWeight: "700", backgroundImage: `url(${cat.img})`,
-            backgroundSize: "cover", backgroundPosition: "center", transition: "transform 0.3s, box-shadow 0.3s",
-            boxShadow: "0 5px 15px rgba(0,0,0,0.15)"
-          }} className="category-box">
-            <div style={{
-              position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent 60%)",
-              transition: "background 0.3s"
-            }} className="overlay"></div>
-            <div style={{ position: "relative", width: "100%", textAlign: "center", paddingBottom: "20px" }}>{cat.nome}</div>
-          </Link>
-        ))}
-      </section>
-
-      {/* Rodapé */}
-      <footer style={{
-        width: "100%", background: "#1a1a1a", color: "#fff", textAlign: "center",
-        padding: "1.5rem 0", position: "fixed", bottom: 0, left: 0, fontSize: "0.9rem"
-      }}>
-        3S Produtos Industriais © 2025 | Email: contato@3sind.com | Tel: (11) 99999-9999 | Rua Industrial, 123, São Paulo - SP
+      {/* Footer */}
+      <footer className="main-footer">
+        <p>© 2025 3S Produtos Industriais. Todos os direitos reservados.</p>
       </footer>
-
-      {/* Menu lateral direito */}
-<div 
-  className={`right-menu ${showRightMenu ? "show" : ""}`}
-  onMouseEnter={() => setShowRightMenu(true)}
-  onMouseLeave={() => setShowRightMenu(false)}
->
-  {/* Links do menu */}
-  <div className="menu-links">
-    <Link to="/">Home</Link>
-    <Link to="/produtos">Produtos</Link>
-    <Link to="/sobre">Sobre</Link>
-    <Link to="/contato">Contato</Link>
-  </div>
-
-  {/* Botão Admin fixo embaixo */}
-  <div className="admin-btn">
-    <Link to="/admin/login">Admin</Link>
-  </div>
-</div>
-    </div>);
+    </div>
+  );
 }
-
-const iconBtnStyle = {
-  fontSize: "1.5rem", marginLeft: "15px", background: "none", border: "none", cursor: "pointer", color: "#fff",
-  transition: "color 0.3s, transform 0.2s"
-};
-
-const rightMenuLink = {
-  color: "#fff",
-  textDecoration: "none",
-  padding: "1rem",
-  fontWeight: "bold",
-  transition: "color 0.3s",
-  cursor: "pointer"
-};
