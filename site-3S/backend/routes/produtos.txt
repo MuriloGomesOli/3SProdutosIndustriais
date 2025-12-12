@@ -1,0 +1,7 @@
+válvulas(esfera, gaveta,globo,retenção,borboleta)
+FIXAÇÃO(parafuso,arruelas,barra roscada,buchas fixação,chumbador,escapula,gancho,pregos)
+CONEXÕES(flange,curvas,teg,cotovelos,cruzetas,conectores,luvas)
+materiais siderurgicos
+metais não ferrosos(latão, cobre,alumínio,bronze e inox)
+vedação industrial(juntas vedação, juntas espansão, papelas hidraulico, isolação térmica, fitas vedarosca, graxetas)
+plástico(placas, tarugos, tubos, películas, barras, usinados

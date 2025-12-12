@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import logo from "../assets/3S/logopreta.jpeg";
+
 
 export default function ProdutoDetalhe({ adicionarCarrinho }) {
   const { id } = useParams();

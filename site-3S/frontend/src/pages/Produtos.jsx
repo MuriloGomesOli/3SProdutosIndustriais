@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import "../App.css";
+import logo from "../assets/3S/logopreta.jpeg";
+
 
 export default function Produtos() {
   const [searchParams] = useSearchParams();
@@ -9,6 +11,19 @@ export default function Produtos() {
   const [produtos, setProdutos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mensagem, setMensagem] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(categoriaId || "");
+
+  // Categories list (Same as Home)
+  const categorias = [
+    { id: 7, nome: "Válvulas" },
+    { id: 1, nome: "Fixação" },
+    { id: 2, nome: "Conexões" },
+    { id: 3, nome: "Siderúrgicos" },
+    { id: 4, nome: "Metais Não Ferrosos" },
+    { id: 5, nome: "Vedação Industrial" },
+    { id: 6, nome: "Plástico" },
+  ];
 
   useEffect(() => {
     setLoading(true);
@@ -31,12 +46,12 @@ export default function Produtos() {
   }, [categoriaId]);
 
   const adicionarAoCarrinho = (produto) => {
-    // Verificar se cliente está logado
-    const cliente = localStorage.getItem("cliente");
-    if (!cliente) {
-      navigate("/login");
-      return;
-    }
+    // Verificar se cliente está logado (REMOVIDO para permitir cotação sem login)
+    // const cliente = localStorage.getItem("cliente");
+    // if (!cliente) {
+    //   navigate("/login");
+    //   return;
+    // }
 
     // Pegar carrinho atual do localStorage
     const carrinhoAtual = JSON.parse(localStorage.getItem("carrinho") || "[]");
@@ -59,27 +74,24 @@ export default function Produtos() {
     // Salvar no localStorage
     localStorage.setItem("carrinho", JSON.stringify(carrinhoAtual));
 
-    // Mostrar mensagem
-    setMensagem(`${produto.nome} adicionado ao carrinho!`);
-    setTimeout(() => setMensagem(""), 3000);
+    // Redirecionar para a página de cotação (carrinho)
+    navigate("/carrinho");
   };
 
   return (
     <div className="home-container">
       <header className="main-header">
         <div className="header-content">
-          <div className="logo"><Link to="/" style={{ color: '#fff', textDecoration: 'none' }}>3S Produtos Industriais</Link></div>
-          <div className="search-bar">
-            <input type="text" placeholder="Buscar produtos..." />
-            <button><i className="fas fa-search"></i></button>
-          </div>
-          <div className="header-actions">
-            <Link to="/login" className="header-link">Contato</Link>
-            <Link to="/sobre" className="header-link">Quem Somos</Link>
-            <Link to="/login" className="cart-icon">
-              <i className="fas fa-shopping-cart"></i>
+          <div className="logo">
+            <Link to="/">
+              <img src={logo} alt="3S Produtos Industriais" style={{ height: '60px', paddingTop: '10px', paddingLeft: '80px' }} />
             </Link>
           </div>
+          <nav className="main-nav">
+            <Link to="/produtos" className="nav-link">PRODUTOS</Link>
+            <Link to="/sobre" className="nav-link">SOBRE</Link>
+            <Link to="/#contato" className="nav-link">CONTATO</Link>
+          </nav>
         </div>
       </header>
 
@@ -106,37 +118,75 @@ export default function Produtos() {
             <Link to="/" className="cta-button" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>Voltar</Link>
           </div>
 
+          <div className="products-filter-container">
+            <div className="filter-group">
+              <input
+                type="text"
+                placeholder="Buscar produto..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+              <button className="search-btn"><i className="fas fa-search"></i></button>
+            </div>
+
+            <div className="filter-group">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="category-select"
+              >
+                <option value="">Todas as Categorias</option>
+                {categorias.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.nome}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           {loading ? <p>Carregando produtos...</p> : (
             <div className="products-grid">
-              {produtos.length > 0 ? produtos.map(prod => (
-                <div key={prod.id} className="product-card-mini">
-                  <img src={prod.imagem || "https://via.placeholder.com/200"} alt={prod.nome} />
-                  <div className="prod-info">
-                    <span style={{ fontSize: '0.8rem', color: '#888' }}>{prod.categoria_nome}</span>
-                    <h3>{prod.nome}</h3>
-                    <p className="price">R$ {prod.preco}</p>
-                    <button
-                      onClick={() => adicionarAoCarrinho(prod)}
-                      style={{
-                        width: '100%',
-                        marginTop: '0.8rem',
-                        padding: '0.6rem',
-                        background: 'linear-gradient(to right, #ff6600, #ff8533)',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s'
-                      }}
-                      onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
-                      onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
-                    >
-                      🛒 Adicionar ao Carrinho
-                    </button>
-                  </div>
-                </div>
-              )) : <p>Nenhum produto encontrado.</p>}
+              {produtos
+                .filter(prod => {
+                  const matchesSearch = prod.nome.toLowerCase().includes(searchTerm.toLowerCase());
+                  const matchesCategory = selectedCategory ? prod.categoria_id === parseInt(selectedCategory) : true;
+                  return matchesSearch && matchesCategory;
+                })
+                .length > 0 ? produtos
+                  .filter(prod => {
+                    const matchesSearch = prod.nome.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesCategory = selectedCategory ? prod.categoria_id === parseInt(selectedCategory) : true;
+                    return matchesSearch && matchesCategory;
+                  })
+                  .map(prod => (
+                    <div key={prod.id} className="product-card-mini">
+                      <img src={prod.imagem || "https://via.placeholder.com/200"} alt={prod.nome} />
+                      <div className="prod-info">
+                        <span style={{ fontSize: '0.8rem', color: '#888' }}>{prod.categoria_nome}</span>
+                        <h3>{prod.nome}</h3>
+                        <p className="price">R$ {prod.preco}</p>
+                        <button
+                          onClick={() => adicionarAoCarrinho(prod)}
+                          style={{
+                            width: '100%',
+                            marginTop: '0.8rem',
+                            padding: '0.6rem',
+                            background: 'linear-gradient(to right, #ff6600, #ff8533)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s'
+                          }}
+                          onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                          onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+                        >
+                          🛒 Adicionar ao Carrinho
+                        </button>
+                      </div>
+                    </div>
+                  )) : <p>Nenhum produto encontrado.</p>}
             </div>
           )}
         </main>

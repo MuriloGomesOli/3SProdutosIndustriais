@@ -7,9 +7,12 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const [produtos] = await db.query(`
-      SELECT p.*, c.nome as categoria_nome 
+      SELECT p.*, c.nome as categoria_nome, 
+             IFNULL(e.quantidade, 0) as estoque,
+             IFNULL(e.minimo, 10) as estoque_minimo
       FROM produtos p 
       LEFT JOIN categorias c ON p.categoria_id = c.id
+      LEFT JOIN estoque e ON p.id = e.produto_id
     `);
     res.json(produtos);
   } catch (error) {

@@ -28,15 +28,6 @@ function padronizarDados(dados) {
         // Manter como string (CPF é um identificador, não um número)
     }
 
-    // Padronizar CNPJ - remover tudo exceto números
-    if (dados.cnpj) {
-        dadosPadronizados.cnpj = dados.cnpj.replace(/\D/g, "");
-        // Validar tamanho (14 dígitos)
-        if (dadosPadronizados.cnpj.length !== 14) {
-            erros.push("CNPJ deve ter exatamente 14 dígitos");
-        }
-        // Manter como string (CNPJ é um identificador, não um número)
-    }
 
     return { dadosPadronizados, erros };
 }
@@ -44,7 +35,7 @@ function padronizarDados(dados) {
 // Cadastro de novo cliente
 router.post("/cadastro", async (req, res) => {
     try {
-        const { nome, email, senha, telefone, endereco, cpf, cnpj } = req.body;
+        const { nome, email, senha, telefone, endereco, cpf } = req.body;
 
         // Validação básica
         if (!nome || !email || !senha) {
@@ -57,7 +48,6 @@ router.post("/cadastro", async (req, res) => {
         const { dadosPadronizados, erros } = padronizarDados({
             telefone,
             cpf,
-            cnpj
         });
 
         if (erros.length > 0) {
@@ -92,27 +82,14 @@ router.post("/cadastro", async (req, res) => {
             }
         }
 
-        // Verificar se CNPJ já existe (se fornecido)
-        if (dadosPadronizados.cnpj) {
-            const [cnpjExistente] = await db.query(
-                "SELECT id FROM clientes WHERE cnpj = ?",
-                [dadosPadronizados.cnpj]
-            );
-
-            if (cnpjExistente.length > 0) {
-                return res.status(400).json({
-                    erro: "CNPJ já cadastrado"
-                });
-            }
-        }
 
         // Criptografar senha com bcrypt (10 rounds)
         const senhaHash = await bcrypt.hash(senha, 10);
 
         // Inserir cliente no banco com dados padronizados
         const [resultado] = await db.query(
-            `INSERT INTO clientes (nome, email, senha, telefone, endereco, cpf, cnpj) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            `INSERT INTO clientes (nome, email, senha, telefone, endereco, cpf) 
+       VALUES (?, ?, ?, ?, ?, ?)`,
             [
                 nome,
                 email,
@@ -120,7 +97,6 @@ router.post("/cadastro", async (req, res) => {
                 dadosPadronizados.telefone || null,
                 endereco || null,
                 dadosPadronizados.cpf || null,
-                dadosPadronizados.cnpj || null
             ]
         );
 

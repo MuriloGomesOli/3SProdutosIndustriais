@@ -5,13 +5,11 @@ import Produtos from "./pages/Produtos";
 import ProdutoDetalhe from "./pages/ProdutoDetalhe";
 import Sobre from "./pages/Sobre";
 import Contato from "./pages/Contato";
-import Cadastro from "./pages/Cadastro";
-import Login from "./pages/Login";
 import Carrinho from "./pages/Carrinho";
-import AdminProdutos from "./pages/AdminProdutos";
-import "./App.css";
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
-
+import TesteOrcamento from "./pages/TesteOrcamento";
+import "./App.css";
 
 export default function App() {
   return (
@@ -23,19 +21,16 @@ export default function App() {
           <Route path="/produtos/:id" element={<ProdutoDetalhe />} />
           <Route path="/sobre" element={<Sobre />} />
           <Route path="/contato" element={<Contato />} />
-          <Route path="/cadastro" element={<Cadastro />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/contato" element={<Contato />} />
           <Route path="/carrinho" element={<Carrinho />} />
+          <Route path="/teste-orcamento" element={<TesteOrcamento />} />
           <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin" element={<AdminProdutos />} />
+          <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </main>
 
       <footer>
-        <p>© 2025 3S Produtos Industriais | Todos os direitos reservados</p>
-        <p>
-          Endereço: Rua Industrial, 123 - São Paulo | Email: contato@3s.com.br
-        </p>
+
       </footer>
     </BrowserRouter>
   );

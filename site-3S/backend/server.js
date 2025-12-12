@@ -23,10 +23,19 @@ conectarBanco();
 import produtosRoutes from "./routes/produtos.js";
 import clientesRoutes from "./routes/clientes.js";
 import pedidosRoutes from "./routes/pedidos.js";
+import contatosRoutes from "./routes/contatos.js";
+import estoqueRoutes from "./routes/estoque.js";
+import orcamentosRoutes from "./routes/orcamentos.js";
+
+// Servir arquivos estáticos (uploads)
+app.use("/uploads", express.static("uploads"));
 
 app.use("/api/produtos", produtosRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/pedidos", pedidosRoutes);
+app.use("/api/contatos", contatosRoutes);
+app.use("/api/estoque", estoqueRoutes);
+app.use("/api/orcamentos", orcamentosRoutes);
 app.use("/admin", adminRoutes);
 
 const PORT = 3000;

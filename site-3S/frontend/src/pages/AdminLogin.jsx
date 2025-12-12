@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("admin@3s.com");
+  const [senha, setSenha] = useState("admin123");
   const [erro, setErro] = useState("");
 
   const logar = async (e) => {
@@ -26,7 +28,7 @@ export default function AdminLogin() {
       localStorage.setItem("adminToken", dados.token);
 
       // redireciona ao painel admin
-      window.location.href = "/admin/dashboard";
+      navigate("/admin");
 
     } catch (err) {
       console.error(err);

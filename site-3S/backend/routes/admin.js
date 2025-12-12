@@ -19,16 +19,20 @@ router.post("/login", async (req, res) => {
       [email]
     );
 
-    if (rows.length === 0)
+    if (rows.length === 0) {
+      console.log(`Login falhou: Admin não encontrado para email ${email}`);
       return res.status(404).json({ error: "Admin não encontrado" });
+    }
 
     const admin = rows[0];
 
     // Confere senha
     const senhaOk = await bcrypt.compare(senha, admin.senha);
 
-    if (!senhaOk)
+    if (!senhaOk) {
+      console.log(`Login falhou: Senha incorreta para ${email}`);
       return res.status(401).json({ error: "Senha incorreta" });
+    }
 
     // Cria token JWT
     const token = jwt.sign(
@@ -40,6 +44,8 @@ router.post("/login", async (req, res) => {
       "SEGREDO_SUPER_SEGURO",
       { expiresIn: "2h" }
     );
+
+    console.log(`Login realizado com sucesso para ${email}`);
 
     res.json({
       mensagem: "Login realizado",

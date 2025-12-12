@@ -82,7 +82,7 @@ CREATE TABLE `categorias` (
   `nome` varchar(150) NOT NULL,
   `descricao` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -91,7 +91,7 @@ CREATE TABLE `categorias` (
 
 LOCK TABLES `categorias` WRITE;
 /*!40000 ALTER TABLE `categorias` DISABLE KEYS */;
-INSERT INTO `categorias` VALUES (1,'Fixação',NULL),(2,'Conexões',NULL),(3,'Siderúrgicos',NULL),(4,'Metais',NULL),(5,'Vedação',NULL),(6,'Plástico',NULL);
+INSERT INTO `categorias` VALUES (1,'Fixação',NULL),(2,'Conexões',NULL),(3,'Siderúrgicos',NULL),(4,'Metais',NULL),(5,'Vedação',NULL),(6,'Plástico',NULL),(7,'Valvulas',NULL);
 /*!40000 ALTER TABLE `categorias` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -109,11 +109,10 @@ CREATE TABLE `clientes` (
   `senha` varchar(255) NOT NULL,
   `telefone` varchar(20) DEFAULT NULL,
   `endereco` varchar(255) DEFAULT NULL,
-  `CPF` int NOT NULL,
-  `CNPJ` int NOT NULL,
+  `cpf` varchar(15) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -122,6 +121,7 @@ CREATE TABLE `clientes` (
 
 LOCK TABLES `clientes` WRITE;
 /*!40000 ALTER TABLE `clientes` DISABLE KEYS */;
+INSERT INTO `clientes` VALUES (1,'Murilo Gomes','alan@gmail.com','$2b$10$fNe/jlsvqVr7uyT2h3VS2eTzyOgFTr76fUat7voDkgaH9v9e7NYKi','11988122847','rTHGTREGREFG','47837849817');
 /*!40000 ALTER TABLE `clientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -136,6 +136,7 @@ CREATE TABLE `estoque` (
   `id` int NOT NULL AUTO_INCREMENT,
   `produto_id` int NOT NULL,
   `quantidade` int DEFAULT '0',
+  `minimo` int DEFAULT '10',
   PRIMARY KEY (`id`),
   KEY `produto_id` (`produto_id`),
   CONSTRAINT `estoque_ibfk_1` FOREIGN KEY (`produto_id`) REFERENCES `produtos` (`id`)
@@ -152,6 +153,36 @@ LOCK TABLES `estoque` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `contato`
+--
+
+DROP TABLE IF EXISTS `contato`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `contato` (
+  `idcontato` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(45) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `mensagem` text,
+  `status` enum('pendente','respondido') DEFAULT 'pendente',
+  `resposta` text,
+  `respondido_por` varchar(100) DEFAULT NULL,
+  `data_resposta` timestamp NULL DEFAULT NULL,
+  `data_contato` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`idcontato`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `contato`
+--
+
+LOCK TABLES `contato` WRITE;
+/*!40000 ALTER TABLE `contato` DISABLE KEYS */;
+/*!40000 ALTER TABLE `contato` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `pedidos`
 --
 
@@ -160,9 +191,13 @@ DROP TABLE IF EXISTS `pedidos`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pedidos` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `cliente_id` int NOT NULL,
-  `total` decimal(10,2) NOT NULL,
-  `status` enum('pendente','pago','enviado','cancelado') DEFAULT 'pendente',
+  `cliente_id` int DEFAULT NULL,
+  `nome_cliente` varchar(150) DEFAULT NULL,
+  `email_cliente` varchar(200) DEFAULT NULL,
+  `telefone_cliente` varchar(20) DEFAULT NULL,
+  `mensagem` text,
+  `total` decimal(10,2) DEFAULT '0.00',
+  `status` varchar(50) DEFAULT 'pendente',
   `data_pedido` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `cliente_id` (`cliente_id`),
@@ -188,15 +223,13 @@ DROP TABLE IF EXISTS `pedidos_itens`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pedidos_itens` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `pedido_id` int NOT NULL,
-  `produto_id` int NOT NULL,
-  `quantidade` int NOT NULL,
-  `preco_unit` decimal(10,2) NOT NULL,
+  `pedido_id` int DEFAULT NULL,
+  `nome_produto` varchar(255) DEFAULT NULL,
+  `quantidade` int DEFAULT NULL,
+  `especificacao` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `pedido_id` (`pedido_id`),
-  KEY `produto_id` (`produto_id`),
-  CONSTRAINT `pedidos_itens_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `pedidos_itens_ibfk_2` FOREIGN KEY (`produto_id`) REFERENCES `produtos` (`id`)
+  CONSTRAINT `pedidos_itens_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -223,6 +256,8 @@ CREATE TABLE `produtos` (
   `preco` decimal(10,2) NOT NULL,
   `categoria_id` int NOT NULL,
   `imagem` varchar(255) DEFAULT NULL,
+  `fornecedor` varchar(255) DEFAULT NULL,
+  `sku` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `categoria_id` (`categoria_id`),
   CONSTRAINT `produtos_ibfk_1` FOREIGN KEY (`categoria_id`) REFERENCES `categorias` (`id`)
@@ -235,8 +270,38 @@ CREATE TABLE `produtos` (
 
 LOCK TABLES `produtos` WRITE;
 /*!40000 ALTER TABLE `produtos` DISABLE KEYS */;
-INSERT INTO `produtos` VALUES (1,'Parafuso',NULL,0.00,1,NULL),(2,'Arruelas',NULL,0.00,1,NULL),(3,'Barra Roscada',NULL,0.00,1,NULL),(4,'Buchas de Fixação',NULL,0.00,1,NULL),(5,'Chumbador',NULL,0.00,1,NULL),(6,'Escápula',NULL,0.00,1,NULL),(7,'Gancho',NULL,0.00,1,NULL),(8,'Pregos',NULL,0.00,1,NULL),(9,'Flange',NULL,0.00,2,NULL),(10,'Curvas',NULL,0.00,2,NULL),(11,'Tê',NULL,0.00,2,NULL),(12,'Cotovelos',NULL,0.00,2,NULL),(13,'Cruzetas',NULL,0.00,2,NULL),(14,'Conectores',NULL,0.00,2,NULL),(15,'Luvas',NULL,0.00,2,NULL),(16,'Latão',NULL,0.00,4,NULL),(17,'Cobre',NULL,0.00,4,NULL),(18,'Alumínio',NULL,0.00,4,NULL),(19,'Bronze',NULL,0.00,4,NULL),(20,'Inox',NULL,0.00,4,NULL),(21,'Juntas de Vedação',NULL,0.00,5,NULL),(22,'Juntas de Expansão',NULL,0.00,5,NULL),(23,'Papelão Hidráulico',NULL,0.00,5,NULL),(24,'Isolação Térmica',NULL,0.00,5,NULL),(25,'Fita Vedarosca',NULL,0.00,5,NULL),(26,'Graxetas',NULL,0.00,5,NULL),(27,'Placas',NULL,0.00,6,NULL),(28,'Tarugos',NULL,0.00,6,NULL),(29,'Tubos',NULL,0.00,6,NULL),(30,'Películas',NULL,0.00,6,NULL),(31,'Barras',NULL,0.00,6,NULL),(32,'Usinados',NULL,0.00,6,NULL);
+INSERT INTO `produtos` VALUES (1,'Parafuso',NULL,0.00,1,NULL,NULL,NULL),(2,'Arruelas',NULL,0.00,1,NULL,NULL,NULL),(3,'Barra Roscada',NULL,0.00,1,NULL,NULL,NULL),(4,'Buchas de Fixação',NULL,0.00,1,NULL,NULL,NULL),(5,'Chumbador',NULL,0.00,1,NULL,NULL,NULL),(6,'Escápula',NULL,0.00,1,NULL,NULL,NULL),(7,'Gancho',NULL,0.00,1,NULL,NULL,NULL),(8,'Pregos',NULL,0.00,1,NULL,NULL,NULL),(9,'Flange',NULL,0.00,2,NULL,NULL,NULL),(10,'Curvas',NULL,0.00,2,NULL,NULL,NULL),(11,'Tê',NULL,0.00,2,NULL,NULL,NULL),(12,'Cotovelos',NULL,0.00,2,NULL,NULL,NULL),(13,'Cruzetas',NULL,0.00,2,NULL,NULL,NULL),(14,'Conectores',NULL,0.00,2,NULL,NULL,NULL),(15,'Luvas',NULL,0.00,2,NULL,NULL,NULL),(16,'Latão',NULL,0.00,4,NULL,NULL,NULL),(17,'Cobre',NULL,0.00,4,NULL,NULL,NULL),(18,'Alumínio',NULL,0.00,4,NULL,NULL,NULL),(19,'Bronze',NULL,0.00,4,NULL,NULL,NULL),(20,'Inox',NULL,0.00,4,NULL,NULL,NULL),(21,'Juntas de Vedação',NULL,0.00,5,NULL,NULL,NULL),(22,'Juntas de Expansão',NULL,0.00,5,NULL,NULL,NULL),(23,'Papelão Hidráulico',NULL,0.00,5,NULL,NULL,NULL),(24,'Isolação Térmica',NULL,0.00,5,NULL,NULL,NULL),(25,'Fita Vedarosca',NULL,0.00,5,NULL,NULL,NULL),(26,'Graxetas',NULL,0.00,5,NULL,NULL,NULL),(27,'Placas',NULL,0.00,6,NULL,NULL,NULL),(28,'Tarugos',NULL,0.00,6,NULL,NULL,NULL),(29,'Tubos',NULL,0.00,6,NULL,NULL,NULL),(30,'Películas',NULL,0.00,6,NULL,NULL,NULL),(31,'Barras',NULL,0.00,6,NULL,NULL,NULL),(32,'Usinados',NULL,0.00,6,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `produtos` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `movimentacoes_estoque`
+--
+
+DROP TABLE IF EXISTS `movimentacoes_estoque`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `movimentacoes_estoque` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `produto_id` int NOT NULL,
+  `tipo` enum('entrada','saida') NOT NULL,
+  `quantidade` int NOT NULL,
+  `motivo` varchar(255) DEFAULT NULL,
+  `responsavel` varchar(100) DEFAULT NULL,
+  `data_movimentacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `produto_id` (`produto_id`),
+  CONSTRAINT `movimentacoes_estoque_ibfk_1` FOREIGN KEY (`produto_id`) REFERENCES `produtos` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `movimentacoes_estoque`
+--
+
+LOCK TABLES `movimentacoes_estoque` WRITE;
+/*!40000 ALTER TABLE `movimentacoes_estoque` DISABLE KEYS */;
+/*!40000 ALTER TABLE `movimentacoes_estoque` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -263,7 +328,7 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,'Admin Master','admin@3s.com','admin123','admin');
+INSERT INTO `usuarios` VALUES (1,'Admin Master','admin@3s.com','$2b$10$jFDeAg8j5M4kncRP2E5EiuDV88fZdVFCRYCde3SAM/f9Zhi0E2kz.','admin');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -276,4 +341,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-12-02 22:03:53
+-- Dump completed on 2025-12-12 12:03:33
